@@ -68,6 +68,8 @@ def decode(line: str, file_name: pathlib.Path, task: str, full_sentence_scores: 
 
     if task == "blimp":
         data_dict = decode_blimp(raw_dict, file_name)
+    elif task == "jblimp":
+        data_dict = decode_jblimp(raw_dict, file_name)
     elif task == "ewok":
         data_dict = decode_ewok(raw_dict, full_sentence_scores)
     elif "wug" in task:
@@ -123,6 +125,35 @@ def decode_blimp(raw_dict: dict[str, Any], file_name: pathlib.Path) -> dict[str,
             "UID": file_name.stem,
             "linguistics_term": "supplement",
         }
+
+    return pair
+
+
+def decode_jblimp(raw_dict: dict[str, Any], file_name: pathlib.Path) -> dict[str, str]:
+    """This function takes a dictionary of a single datapoint
+    of a JBLiMP datafile and returns a dictionary of terms to be
+    used by the evaluation.
+
+    Args:
+        raw_dict(dict[str, Any]): A dictionary from a single
+            datapoint of a JBLiMP datafile.
+        file_name(pathlib.Path): When no UID is mentioned, we
+            take the file name.
+
+    Returns:
+        dict[str, str]: A dictionary with values used for
+            evaluation.
+    """
+
+    pair = {
+        "sentences": [raw_dict["good_sentence"], raw_dict["bad_sentence"]],
+        "prefixes": [None, None],
+        "completions": [raw_dict["good_sentence"], raw_dict["bad_sentence"]],
+        "label": 0,
+        "field": raw_dict["type"],
+        "UID": raw_dict["paradigm"],
+        "linguistics_term": raw_dict["phenomenon"],
+    }
 
     return pair
 
