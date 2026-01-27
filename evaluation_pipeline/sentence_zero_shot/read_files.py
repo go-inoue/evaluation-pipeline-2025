@@ -68,7 +68,7 @@ def decode(line: str, file_name: pathlib.Path, task: str, full_sentence_scores: 
 
     if task == "blimp":
         data_dict = decode_blimp(raw_dict, file_name)
-    elif task == "jblimp":
+    elif task.startswith("jblimp"):
         data_dict = decode_jblimp(raw_dict, file_name)
     elif task == "ewok":
         data_dict = decode_ewok(raw_dict, full_sentence_scores)
