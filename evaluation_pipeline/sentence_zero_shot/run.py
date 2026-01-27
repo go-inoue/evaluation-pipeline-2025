@@ -160,12 +160,15 @@ def main():
     if args.images_path is not None:
         assert args.batch_size == 1, "Multimodal only works in batch size 1!"
     dataset = args.data_path.stem
-    args.model_name = pathlib.Path(args.model_path_or_name).stem
-    if args.revision_name is None:
-        revision_name = "main"
+
+    if "epoch" in args.model_path_or_name:
+        args.model_name = pathlib.Path(args.model_path_or_name).parent.stem
+        checkpoint_name = pathlib.Path(args.model_path_or_name).stem
     else:
-        revision_name = args.revision_name
-    args.output_path = args.output_dir / args.model_name / revision_name / "zero_shot" / args.backend / args.task / dataset
+        args.model_name = pathlib.Path(args.model_path_or_name).stem
+        checkpoint_name = "best"
+
+    args.output_path = args.output_dir / dataset / args.model_name / checkpoint_name
     args.output_path.mkdir(parents=True, exist_ok=True)
 
     # Get results
