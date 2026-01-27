@@ -168,7 +168,7 @@ def main():
         args.model_name = pathlib.Path(args.model_path_or_name).stem
         checkpoint_name = "best"
 
-    args.output_path = args.output_dir / dataset / args.model_name / checkpoint_name
+    args.output_path = args.output_dir / args.task / args.model_name / checkpoint_name
     args.output_path.mkdir(parents=True, exist_ok=True)
 
     # Get results
