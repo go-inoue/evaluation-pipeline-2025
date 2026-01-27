@@ -60,7 +60,7 @@ def rank_and_evaluate(args, subset_to_stats, all_log_probs, raw_sentences, label
         stacked_probs = torch.stack(all_log_probs[temp], dim=1)
         chosen_sentences = torch.max(stacked_probs, dim=1)[1].tolist()
 
-        for raw_sentence_dict, chosen_sentence, label, metadata, uid in zip(raw_sentences, chosen_sentences, labels, metadatas, uids):
+        for raw_sentence_dict, chosen_sentence, label, metadata, uid, stacked_prob in zip(raw_sentences, chosen_sentences, labels, metadatas, uids, stacked_probs):
             is_correct = chosen_sentence == label
             for key, value in metadata.items():
                 temp_dict[key]["total"][value] += 1
@@ -69,9 +69,9 @@ def rank_and_evaluate(args, subset_to_stats, all_log_probs, raw_sentences, label
             if args.save_predictions:
                 num_id_matches = len(predictions[temp][uid])
                 if args.task == "comps":
-                    predictions[temp][uid].append({"id" : f"{uid}_{num_id_matches}", "pred" : raw_sentence_dict["sentences"][chosen_sentence]})
+                    predictions[temp][uid].append({"id" : f"{uid}_{num_id_matches}", "pred" : raw_sentence_dict["sentences"][chosen_sentence], "correct" : is_correct, "sentences" : raw_sentence_dict["sentences"], "probs" : stacked_prob.tolist()})
                 else:
-                    predictions[temp][uid].append({"id" : f"{uid}_{num_id_matches}", "pred" : raw_sentence_dict["completions"][chosen_sentence]})
+                    predictions[temp][uid].append({"id" : f"{uid}_{num_id_matches}", "pred" : raw_sentence_dict["completions"][chosen_sentence], "correct" : is_correct, "sentences" : raw_sentence_dict["sentences"], "probs" : stacked_prob.tolist()})
 
 
 def rank_and_evaluate_wug(args, subset_to_stats, all_log_probs, raw_sentences, labels, metadatas, uids, predictions):

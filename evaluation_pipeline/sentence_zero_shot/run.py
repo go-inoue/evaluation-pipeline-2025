@@ -85,6 +85,12 @@ def process_results(args: argparse.ArgumentParser, results: dict):
             keys = count_dict["total"].keys()
             subdomain_accs = {key : 100.0 * count_dict["correct"][key] / count_dict["total"][key] for key in keys}
             accuracies[temp][subdomain] = subdomain_accs
+    # compute the total accuracies as well
+        total_counts = {"correct" : 0, "total" : 0}
+        for subdomain, count_dict in temp_results.items():
+            total_counts["correct"] += sum(count_dict["correct"].values())
+            total_counts["total"] += sum(count_dict["total"].values())
+        accuracies[temp]["TOTAL"] = {"total" : 100.0 * total_counts["correct"] / total_counts["total"]}
 
     # Average accuracies
     average_accuracies = {}
@@ -142,17 +148,17 @@ def create_evaluation_report(temperature: float, avg_accuracy: torch.Tensor, acc
     for domain, accuracy in accuracies.items():
         print(f"### {domain.upper()} {metric}", file=file)
         for subdomain, acc in accuracy.items():
-            print(f"{subdomain}: {acc:.2f}", file=file)
+            print(f"{subdomain}: {acc}", file=file)
         print(file=file)
 
-    print(f"### AVERAGE {metric}", file=file)
-    print(f"{avg_accuracy:.2f}", file=file)
+    print(f"### MACRO AVERAGE UID {metric}", file=file)
+    print(f"macro-average: {avg_accuracy}", file=file)
     print(file=file)
 
 
 def save_predictions(args, predictions, best_temp):
     with (args.output_path / "predictions.json").open("w") as f:
-        json.dump(predictions[best_temp], f)
+        json.dump(predictions[best_temp], f, indent=4, ensure_ascii=False)
 
 
 def main():
