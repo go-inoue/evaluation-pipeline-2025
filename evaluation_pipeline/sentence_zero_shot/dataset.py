@@ -56,26 +56,64 @@ class CompletionRankingDataset(Dataset):
         processed_sentence_dict = {}
         for sentence_idx, (sentence, completion) in enumerate(zip(sentences, completions)):
             # Basic outputs
+            # if image is None:
+            #     tokenizer_output = self.processor(text=sentence, return_offsets_mapping=True)
+            #     sentence_tokens = tokenizer_output["input_ids"]
+            # else:
+            #     if self.image_token is not None:
+            #         image_sentence = self.image_template.format(image_token=self.image_token, text=sentence)
+            #     else:
+            #         image_sentence = sentence
+            #     tokenizer_output = self.processor(text=image_sentence, images=image, return_offsets_mapping=True)
+            #     sentence_tokens = self.processor(text=sentence, return_offsets_mapping=True)["input_ids"]
+            # tokens = tokenizer_output["input_ids"]
+            # attention_mask = tokenizer_output["attention_mask"]
+            # offset_mapping = tokenizer_output['offset_mapping']
+            # embed_image = torch.FloatTensor(tokenizer_output["pixel_values"]) if image is not None else None
+            # if len(tokens) == 1 and len(sentence) != 0:
+            #     if sentence_tokens:
+            #         sentence_tokens = sentence_tokens[0]
+            #     tokens = tokens[0]
+            #     attention_mask = attention_mask[0]
+            #     offset_mapping = offset_mapping[0]
             if image is None:
-                tokenizer_output = self.processor(text=sentence, return_offsets_mapping=True)
-                sentence_tokens = tokenizer_output["input_ids"]
+                tokenizer_output = self.processor(
+                    text=sentence,
+                    return_offsets_mapping=True,
+                    return_tensors="pt",
+                )
+                sentence_tokens = tokenizer_output["input_ids"][0]
             else:
                 if self.image_token is not None:
-                    image_sentence = self.image_template.format(image_token=self.image_token, text=sentence)
+                    image_sentence = self.image_template.format(
+                        image_token=self.image_token,
+                        text=sentence,
+                    )
                 else:
                     image_sentence = sentence
-                tokenizer_output = self.processor(text=image_sentence, images=image, return_offsets_mapping=True)
-                sentence_tokens = self.processor(text=sentence, return_offsets_mapping=True)["input_ids"]
-            tokens = tokenizer_output["input_ids"]
-            attention_mask = tokenizer_output["attention_mask"]
-            offset_mapping = tokenizer_output['offset_mapping']
-            embed_image = torch.FloatTensor(tokenizer_output["pixel_values"]) if image is not None else None
-            if len(tokens) == 1 and len(sentence) != 0:
-                if sentence_tokens:
-                    sentence_tokens = sentence_tokens[0]
-                tokens = tokens[0]
-                attention_mask = attention_mask[0]
-                offset_mapping = offset_mapping[0]
+
+                tokenizer_output = self.processor(
+                    text=image_sentence,
+                    images=image,
+                    return_offsets_mapping=True,
+                    return_tensors="pt",
+                )
+
+                # tokenize the *plain* sentence separately to get its length
+                sentence_tokens = self.processor(
+                    text=sentence,
+                    return_offsets_mapping=False,
+                    return_tensors="pt",
+                )["input_ids"][0]
+
+            tokens = tokenizer_output["input_ids"][0]          # 1D tensor [T]
+            attention_mask = tokenizer_output["attention_mask"][0]
+            offset_mapping = tokenizer_output["offset_mapping"][0]
+            embed_image = (
+                torch.FloatTensor(tokenizer_output["pixel_values"])
+                if image is not None
+                else None
+            )
 
             # Phrase mask (to determine the exact tokens associated with the completion/suffix)
             start_idx = len(tokens) - len(sentence_tokens)
