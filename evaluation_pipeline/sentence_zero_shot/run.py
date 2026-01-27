@@ -168,10 +168,10 @@ def main():
     dataset = args.data_path.stem
 
     if "epoch" in args.model_path_or_name:
-        args.model_name = pathlib.Path(args.model_path_or_name).parent.basename
-        checkpoint_name = pathlib.Path(args.model_path_or_name).basename
+        args.model_name = pathlib.Path(args.model_path_or_name).parent.name
+        checkpoint_name = pathlib.Path(args.model_path_or_name).name
     else:
-        args.model_name = pathlib.Path(args.model_path_or_name).basename
+        args.model_name = pathlib.Path(args.model_path_or_name).name
         checkpoint_name = "best"
 
     args.output_path = args.output_dir / args.task / args.model_name / checkpoint_name
